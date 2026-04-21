@@ -1,0 +1,13 @@
+# 1. 把 root 下的代码强行复制一份到你的普通用户家目录下
+sudo cp -r /root/HRD_ws /home/ether/
+
+# 2. 把这个文件夹的所有权，从 root 改成你的普通用户 ether
+sudo chown -R ether:ether /home/ether/HRD_ws
+
+# 3. 现在，你就可以正常使用 ~ 进入了！
+cd ~/HRD_ws/ros2_ws/src
+
+# 4. 继续执行 Git 上传指令
+git init
+git add .
+# ... 继续之前的 GitHub 推送步骤
