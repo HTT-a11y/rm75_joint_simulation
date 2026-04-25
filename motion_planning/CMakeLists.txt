@@ -11,6 +11,8 @@ find_package(rclcpp REQUIRED)
 find_package(moveit_ros_planning_interface REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(shape_msgs REQUIRED)
+find_package(moveit_task_constructor_core REQUIRED)
+find_package(moveit_task_constructor_msgs REQUIRED)
 
 # 编译节点
 add_executable(planner_node src/planner_node.cpp)
@@ -22,6 +24,8 @@ ament_target_dependencies(planner_node
   moveit_ros_planning_interface
   geometry_msgs
   shape_msgs
+  moveit_task_constructor_core
+  moveit_task_constructor_msgs
 )
 
 # 编译模拟发布者节点 (Publisher)
@@ -36,6 +40,10 @@ install(TARGETS
   planner_node
   mock_task_publisher
   DESTINATION lib/${PROJECT_NAME}
+)
+
+install(DIRECTORY launch
+  DESTINATION share/${PROJECT_NAME}
 )
 
 if(BUILD_TESTING)

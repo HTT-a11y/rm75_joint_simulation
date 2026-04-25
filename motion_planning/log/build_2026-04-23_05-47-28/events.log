@@ -1,0 +1,193 @@
+[0.000000] (-) TimerEvent: {}
+[0.000108] (motion_planning) JobQueued: {'identifier': 'motion_planning', 'dependencies': OrderedDict()}
+[0.000139] (motion_planning) JobStarted: {'identifier': 'motion_planning'}
+[0.005860] (motion_planning) JobProgress: {'identifier': 'motion_planning', 'progress': 'cmake'}
+[0.006369] (motion_planning) Command: {'cmd': ['/usr/bin/cmake', '/root/HRD_ws/ros2_ws/src/motion_planning', '-DCMAKE_INSTALL_PREFIX=/root/HRD_ws/ros2_ws/src/motion_planning/install/motion_planning'], 'cwd': '/root/HRD_ws/ros2_ws/src/motion_planning/build/motion_planning', 'env': OrderedDict([('HOSTNAME', 'ether-Nitro-AN515-58'), ('SHLVL', '1'), ('LD_LIBRARY_PATH', '/root/HRD_ws/ros2_ws/install/rm_ros_interfaces/lib:/usr/lib/x86_64-linux-gnu/gazebo-11/plugins:/opt/ros/humble/opt/rviz_ogre_vendor/lib:/opt/ros/humble/lib/x86_64-linux-gnu:/opt/ros/humble/lib'), ('HOME', '/root'), ('OLDPWD', '/root/HRD_ws/ros2_ws/src/motion_planning/launch'), ('ROS_PYTHON_VERSION', '3'), ('COLCON_PREFIX_PATH', '/root/HRD_ws/ros2_ws/install'), ('ROS_DISTRO', 'humble'), ('_', '/usr/bin/colcon'), ('ROS_VERSION', '2'), ('TERM', 'xterm'), ('ROS_LOCALHOST_ONLY', '0'), ('PATH', '/opt/ros/humble/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'), ('DISPLAY', ':1'), ('LANG', 'C.UTF-8'), ('LS_COLORS', 'rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:mi=00:su=37;41:sg=30;43:ca=30;41:tw=30;42:ow=34;42:st=37;44:ex=01;32:*.tar=01;31:*.tgz=01;31:*.arc=01;31:*.arj=01;31:*.taz=01;31:*.lha=01;31:*.lz4=01;31:*.lzh=01;31:*.lzma=01;31:*.tlz=01;31:*.txz=01;31:*.tzo=01;31:*.t7z=01;31:*.zip=01;31:*.z=01;31:*.dz=01;31:*.gz=01;31:*.lrz=01;31:*.lz=01;31:*.lzo=01;31:*.xz=01;31:*.zst=01;31:*.tzst=01;31:*.bz2=01;31:*.bz=01;31:*.tbz=01;31:*.tbz2=01;31:*.tz=01;31:*.deb=01;31:*.rpm=01;31:*.jar=01;31:*.war=01;31:*.ear=01;31:*.sar=01;31:*.rar=01;31:*.alz=01;31:*.ace=01;31:*.zoo=01;31:*.cpio=01;31:*.7z=01;31:*.rz=01;31:*.cab=01;31:*.wim=01;31:*.swm=01;31:*.dwm=01;31:*.esd=01;31:*.jpg=01;35:*.jpeg=01;35:*.mjpg=01;35:*.mjpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.svg=01;35:*.svgz=01;35:*.mng=01;35:*.pcx=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.m2v=01;35:*.mkv=01;35:*.webm=01;35:*.webp=01;35:*.ogm=01;35:*.mp4=01;35:*.m4v=01;35:*.mp4v=01;35:*.vob=01;35:*.qt=01;35:*.nuv=01;35:*.wmv=01;35:*.asf=01;35:*.rm=01;35:*.rmvb=01;35:*.flc=01;35:*.avi=01;35:*.fli=01;35:*.flv=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:*.yuv=01;35:*.cgm=01;35:*.emf=01;35:*.ogv=01;35:*.ogx=01;35:*.aac=00;36:*.au=00;36:*.flac=00;36:*.m4a=00;36:*.mid=00;36:*.midi=00;36:*.mka=00;36:*.mp3=00;36:*.mpc=00;36:*.ogg=00;36:*.ra=00;36:*.wav=00;36:*.oga=00;36:*.opus=00;36:*.spx=00;36:*.xspf=00;36:'), ('AMENT_PREFIX_PATH', '/root/HRD_ws/ros2_ws/install/rm_example:/root/HRD_ws/ros2_ws/install/rm_driver:/root/HRD_ws/ros2_ws/install/rm_control:/root/HRD_ws/ros2_ws/install/get_arm_state:/root/HRD_ws/ros2_ws/install/force_position_control:/root/HRD_ws/ros2_ws/install/control_arm_move:/root/HRD_ws/ros2_ws/install/rm_ros_interfaces:/root/HRD_ws/ros2_ws/install/rm_install:/root/HRD_ws/ros2_ws/install/rm_gen72_config:/root/HRD_ws/ros2_ws/install/rm_gazebo:/root/HRD_ws/ros2_ws/install/rm_eco65_config:/root/HRD_ws/ros2_ws/install/rm_eco63_config:/root/HRD_ws/ros2_ws/install/rm_doc:/root/HRD_ws/ros2_ws/install/rm_75_config:/root/HRD_ws/ros2_ws/install/rm_63_config:/root/HRD_ws/ros2_ws/install/rm_description:/root/HRD_ws/ros2_ws/install/rm_bringup:/root/HRD_ws/ros2_ws/install/rm_65_config:/root/HRD_ws/ros2_ws/install/motion_planning:/opt/ros/humble'), ('PWD', '/root/HRD_ws/ros2_ws/src/motion_planning/build/motion_planning'), ('LC_ALL', 'C.UTF-8'), ('PYTHONPATH', '/root/HRD_ws/ros2_ws/install/rm_ros_interfaces/local/lib/python3.10/dist-packages:/opt/ros/humble/lib/python3.10/site-packages:/opt/ros/humble/local/lib/python3.10/dist-packages'), ('COLCON', '1'), ('CMAKE_PREFIX_PATH', '/root/HRD_ws/ros2_ws/install/rm_example:/root/HRD_ws/ros2_ws/install/rm_driver:/root/HRD_ws/ros2_ws/install/rm_control:/root/HRD_ws/ros2_ws/install/get_arm_state:/root/HRD_ws/ros2_ws/install/force_position_control:/root/HRD_ws/ros2_ws/install/control_arm_move:/root/HRD_ws/ros2_ws/install/rm_ros_interfaces:/root/HRD_ws/ros2_ws/install/rm_install:/root/HRD_ws/ros2_ws/install/rm_gen72_config:/root/HRD_ws/ros2_ws/install/rm_gazebo:/root/HRD_ws/ros2_ws/install/rm_eco65_config:/root/HRD_ws/ros2_ws/install/rm_eco63_config:/root/HRD_ws/ros2_ws/install/rm_doc:/root/HRD_ws/ros2_ws/install/rm_75_config:/root/HRD_ws/ros2_ws/install/rm_63_config:/root/HRD_ws/ros2_ws/install/rm_description:/root/HRD_ws/ros2_ws/install/rm_bringup:/root/HRD_ws/ros2_ws/install/rm_65_config:/root/HRD_ws/ros2_ws/install/motion_planning:/opt/ros/humble')]), 'shell': False}
+[0.099482] (-) TimerEvent: {}
+[0.199821] (-) TimerEvent: {}
+[0.228381] (motion_planning) StdoutLine: {'line': b'-- The C compiler identification is GNU 11.4.0\n'}
+[0.273801] (motion_planning) StdoutLine: {'line': b'-- The CXX compiler identification is GNU 11.4.0\n'}
+[0.283831] (motion_planning) StdoutLine: {'line': b'-- Detecting C compiler ABI info\n'}
+[0.300025] (-) TimerEvent: {}
+[0.333040] (motion_planning) StdoutLine: {'line': b'-- Detecting C compiler ABI info - done\n'}
+[0.337225] (motion_planning) StdoutLine: {'line': b'-- Check for working C compiler: /usr/bin/cc - skipped\n'}
+[0.338899] (motion_planning) StdoutLine: {'line': b'-- Detecting C compile features\n'}
+[0.339403] (motion_planning) StdoutLine: {'line': b'-- Detecting C compile features - done\n'}
+[0.342740] (motion_planning) StdoutLine: {'line': b'-- Detecting CXX compiler ABI info\n'}
+[0.387766] (motion_planning) StdoutLine: {'line': b'-- Detecting CXX compiler ABI info - done\n'}
+[0.392188] (motion_planning) StdoutLine: {'line': b'-- Check for working CXX compiler: /usr/bin/c++ - skipped\n'}
+[0.392306] (motion_planning) StdoutLine: {'line': b'-- Detecting CXX compile features\n'}
+[0.392756] (motion_planning) StdoutLine: {'line': b'-- Detecting CXX compile features - done\n'}
+[0.395804] (motion_planning) StdoutLine: {'line': b'-- Found ament_cmake: 1.3.14 (/opt/ros/humble/share/ament_cmake/cmake)\n'}
+[0.400085] (-) TimerEvent: {}
+[0.487734] (motion_planning) StdoutLine: {'line': b'-- Found Python3: /usr/bin/python3 (found version "3.10.12") found components: Interpreter \n'}
+[0.500174] (-) TimerEvent: {}
+[0.561866] (motion_planning) StdoutLine: {'line': b'-- Found rclcpp: 16.0.19 (/opt/ros/humble/share/rclcpp/cmake)\n'}
+[0.599900] (motion_planning) StdoutLine: {'line': b'-- Found rosidl_generator_c: 3.1.8 (/opt/ros/humble/share/rosidl_generator_c/cmake)\n'}
+[0.600243] (-) TimerEvent: {}
+[0.605267] (motion_planning) StdoutLine: {'line': b'-- Found rosidl_adapter: 3.1.8 (/opt/ros/humble/share/rosidl_adapter/cmake)\n'}
+[0.612935] (motion_planning) StdoutLine: {'line': b'-- Found rosidl_generator_cpp: 3.1.8 (/opt/ros/humble/share/rosidl_generator_cpp/cmake)\n'}
+[0.623072] (motion_planning) StdoutLine: {'line': b'-- Using all available rosidl_typesupport_c: rosidl_typesupport_fastrtps_c;rosidl_typesupport_introspection_c\n'}
+[0.636937] (motion_planning) StdoutLine: {'line': b'-- Using all available rosidl_typesupport_cpp: rosidl_typesupport_fastrtps_cpp;rosidl_typesupport_introspection_cpp\n'}
+[0.677316] (motion_planning) StdoutLine: {'line': b'-- Found rmw_implementation_cmake: 6.1.2 (/opt/ros/humble/share/rmw_implementation_cmake/cmake)\n'}
+[0.680538] (motion_planning) StdoutLine: {'line': b'-- Found rmw_fastrtps_cpp: 6.2.10 (/opt/ros/humble/share/rmw_fastrtps_cpp/cmake)\n'}
+[0.700464] (-) TimerEvent: {}
+[0.740512] (motion_planning) StdoutLine: {'line': b'-- Found OpenSSL: /usr/lib/x86_64-linux-gnu/libcrypto.so (found version "3.0.2")  \n'}
+[0.760334] (motion_planning) StdoutLine: {'line': b'-- Found FastRTPS: /opt/ros/humble/include  \n'}
+[0.791673] (motion_planning) StdoutLine: {'line': b"-- Using RMW implementation 'rmw_fastrtps_cpp' as default\n"}
+[0.800534] (-) TimerEvent: {}
+[0.802046] (motion_planning) StdoutLine: {'line': b'-- Looking for pthread.h\n'}
+[0.845131] (motion_planning) StdoutLine: {'line': b'-- Looking for pthread.h - found\n'}
+[0.845367] (motion_planning) StdoutLine: {'line': b'-- Performing Test CMAKE_HAVE_LIBC_PTHREAD\n'}
+[0.888978] (motion_planning) StdoutLine: {'line': b'-- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Success\n'}
+[0.889702] (motion_planning) StdoutLine: {'line': b'-- Found Threads: TRUE  \n'}
+[0.900615] (-) TimerEvent: {}
+[0.926583] (motion_planning) StdoutLine: {'line': b'-- Found moveit_ros_planning_interface: 2.5.9 (/opt/ros/humble/share/moveit_ros_planning_interface/cmake)\n'}
+[0.952440] (motion_planning) StdoutLine: {'line': b'-- Found Boost: /usr/lib/x86_64-linux-gnu/cmake/Boost-1.74.0/BoostConfig.cmake (found version "1.74.0") found components: date_time filesystem program_options system thread \n'}
+[1.000727] (-) TimerEvent: {}
+[1.075426] (motion_planning) StdoutLine: {'line': b'-- Found Boost: /usr/lib/x86_64-linux-gnu/cmake/Boost-1.74.0/BoostConfig.cmake (found version "1.74.0") found components: chrono date_time filesystem iostreams program_options regex serialization system thread \n'}
+[1.100856] (-) TimerEvent: {}
+[1.115778] (motion_planning) StdoutLine: {'line': b'-- Found parameter_traits: 0.7.1 (/opt/ros/humble/share/parameter_traits/cmake)\n'}
+[1.131052] (motion_planning) StdoutLine: {'line': b'-- Found rclcpp_lifecycle: 16.0.19 (/opt/ros/humble/share/rclcpp_lifecycle/cmake)\n'}
+[1.152111] (motion_planning) StdoutLine: {'line': b'-- Found Boost: /usr/lib/x86_64-linux-gnu/cmake/Boost-1.74.0/BoostConfig.cmake (found version "1.74.0") found components: filesystem \n'}
+[1.200952] (-) TimerEvent: {}
+[1.209811] (motion_planning) StdoutLine: {'line': b'-- library: /usr/lib/x86_64-linux-gnu/libcurl.so\n'}
+[1.235009] (motion_planning) StdoutLine: {'line': b'-- Found Eigen3: TRUE (found version "3.4.0") \n'}
+[1.235140] (motion_planning) StdoutLine: {'line': b'-- Ensuring Eigen3 include directory is part of orocos-kdl CMake target\n'}
+[1.301044] (-) TimerEvent: {}
+[1.356972] (motion_planning) StdoutLine: {'line': b'-- Found Boost: /usr/lib/x86_64-linux-gnu/cmake/Boost-1.74.0/BoostConfig.cmake (found version "1.74.0") found components: system filesystem date_time program_options thread chrono \n'}
+[1.378629] (motion_planning) StdoutLine: {'line': b'-- Found Boost: /usr/lib/x86_64-linux-gnu/cmake/Boost-1.74.0/BoostConfig.cmake (found version "1.74.0") found components: thread system filesystem regex date_time program_options \n'}
+[1.395015] (motion_planning) StdoutLine: {'line': b'-- Found Boost: /usr/lib/x86_64-linux-gnu/cmake/Boost-1.74.0/BoostConfig.cmake (found version "1.74.0") found components: system filesystem date_time program_options thread \n'}
+[1.401276] (-) TimerEvent: {}
+[1.415185] (motion_planning) StdoutLine: {'line': b'-- Found moveit_task_constructor_core: 0.1.3 (/opt/ros/humble/share/moveit_task_constructor_core/cmake)\n'}
+[1.453079] (motion_planning) StdoutLine: {'line': b'-- Found ament_lint_auto: 0.12.15 (/opt/ros/humble/share/ament_lint_auto/cmake)\n'}
+[1.501445] (-) TimerEvent: {}
+[1.509272] (motion_planning) StdoutLine: {'line': b"-- Added test 'cppcheck' to perform static code analysis on C / C++ code\n"}
+[1.509508] (motion_planning) StdoutLine: {'line': b'-- Configured cppcheck include dirs: $<BUILD_INTERFACE:/root/HRD_ws/ros2_ws/src/motion_planning/include>\n'}
+[1.509556] (motion_planning) StdoutLine: {'line': b'-- Configured cppcheck exclude dirs and/or files: \n'}
+[1.510282] (motion_planning) StdoutLine: {'line': b"-- Added test 'flake8' to check Python code syntax and style conventions\n"}
+[1.511313] (motion_planning) StdoutLine: {'line': b"-- Added test 'lint_cmake' to check CMake code style\n"}
+[1.511982] (motion_planning) StdoutLine: {'line': b"-- Added test 'pep257' to check Python code against some of the docstring style conventions in PEP 257\n"}
+[1.514622] (motion_planning) StdoutLine: {'line': b"-- Added test 'uncrustify' to check C / C++ code style\n"}
+[1.514732] (motion_planning) StdoutLine: {'line': b'-- Configured uncrustify additional arguments: \n'}
+[1.515386] (motion_planning) StdoutLine: {'line': b"-- Added test 'xmllint' to check XML markup files\n"}
+[1.516342] (motion_planning) StdoutLine: {'line': b'-- Configuring done\n'}
+[1.533925] (motion_planning) StdoutLine: {'line': b'-- Generating done\n'}
+[1.539321] (motion_planning) StdoutLine: {'line': b'-- Build files have been written to: /root/HRD_ws/ros2_ws/src/motion_planning/build/motion_planning\n'}
+[1.548503] (motion_planning) CommandEnded: {'returncode': 0}
+[1.550599] (motion_planning) JobProgress: {'identifier': 'motion_planning', 'progress': 'build'}
+[1.550630] (motion_planning) Command: {'cmd': ['/usr/bin/cmake', '--build', '/root/HRD_ws/ros2_ws/src/motion_planning/build/motion_planning', '--', '-j16', '-l16'], 'cwd': '/root/HRD_ws/ros2_ws/src/motion_planning/build/motion_planning', 'env': OrderedDict([('HOSTNAME', 'ether-Nitro-AN515-58'), ('SHLVL', '1'), ('LD_LIBRARY_PATH', '/root/HRD_ws/ros2_ws/install/rm_ros_interfaces/lib:/usr/lib/x86_64-linux-gnu/gazebo-11/plugins:/opt/ros/humble/opt/rviz_ogre_vendor/lib:/opt/ros/humble/lib/x86_64-linux-gnu:/opt/ros/humble/lib'), ('HOME', '/root'), ('OLDPWD', '/root/HRD_ws/ros2_ws/src/motion_planning/launch'), ('ROS_PYTHON_VERSION', '3'), ('COLCON_PREFIX_PATH', '/root/HRD_ws/ros2_ws/install'), ('ROS_DISTRO', 'humble'), ('_', '/usr/bin/colcon'), ('ROS_VERSION', '2'), ('TERM', 'xterm'), ('ROS_LOCALHOST_ONLY', '0'), ('PATH', '/opt/ros/humble/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'), ('DISPLAY', ':1'), ('LANG', 'C.UTF-8'), ('LS_COLORS', 'rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:mi=00:su=37;41:sg=30;43:ca=30;41:tw=30;42:ow=34;42:st=37;44:ex=01;32:*.tar=01;31:*.tgz=01;31:*.arc=01;31:*.arj=01;31:*.taz=01;31:*.lha=01;31:*.lz4=01;31:*.lzh=01;31:*.lzma=01;31:*.tlz=01;31:*.txz=01;31:*.tzo=01;31:*.t7z=01;31:*.zip=01;31:*.z=01;31:*.dz=01;31:*.gz=01;31:*.lrz=01;31:*.lz=01;31:*.lzo=01;31:*.xz=01;31:*.zst=01;31:*.tzst=01;31:*.bz2=01;31:*.bz=01;31:*.tbz=01;31:*.tbz2=01;31:*.tz=01;31:*.deb=01;31:*.rpm=01;31:*.jar=01;31:*.war=01;31:*.ear=01;31:*.sar=01;31:*.rar=01;31:*.alz=01;31:*.ace=01;31:*.zoo=01;31:*.cpio=01;31:*.7z=01;31:*.rz=01;31:*.cab=01;31:*.wim=01;31:*.swm=01;31:*.dwm=01;31:*.esd=01;31:*.jpg=01;35:*.jpeg=01;35:*.mjpg=01;35:*.mjpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.svg=01;35:*.svgz=01;35:*.mng=01;35:*.pcx=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.m2v=01;35:*.mkv=01;35:*.webm=01;35:*.webp=01;35:*.ogm=01;35:*.mp4=01;35:*.m4v=01;35:*.mp4v=01;35:*.vob=01;35:*.qt=01;35:*.nuv=01;35:*.wmv=01;35:*.asf=01;35:*.rm=01;35:*.rmvb=01;35:*.flc=01;35:*.avi=01;35:*.fli=01;35:*.flv=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:*.yuv=01;35:*.cgm=01;35:*.emf=01;35:*.ogv=01;35:*.ogx=01;35:*.aac=00;36:*.au=00;36:*.flac=00;36:*.m4a=00;36:*.mid=00;36:*.midi=00;36:*.mka=00;36:*.mp3=00;36:*.mpc=00;36:*.ogg=00;36:*.ra=00;36:*.wav=00;36:*.oga=00;36:*.opus=00;36:*.spx=00;36:*.xspf=00;36:'), ('AMENT_PREFIX_PATH', '/root/HRD_ws/ros2_ws/install/rm_example:/root/HRD_ws/ros2_ws/install/rm_driver:/root/HRD_ws/ros2_ws/install/rm_control:/root/HRD_ws/ros2_ws/install/get_arm_state:/root/HRD_ws/ros2_ws/install/force_position_control:/root/HRD_ws/ros2_ws/install/control_arm_move:/root/HRD_ws/ros2_ws/install/rm_ros_interfaces:/root/HRD_ws/ros2_ws/install/rm_install:/root/HRD_ws/ros2_ws/install/rm_gen72_config:/root/HRD_ws/ros2_ws/install/rm_gazebo:/root/HRD_ws/ros2_ws/install/rm_eco65_config:/root/HRD_ws/ros2_ws/install/rm_eco63_config:/root/HRD_ws/ros2_ws/install/rm_doc:/root/HRD_ws/ros2_ws/install/rm_75_config:/root/HRD_ws/ros2_ws/install/rm_63_config:/root/HRD_ws/ros2_ws/install/rm_description:/root/HRD_ws/ros2_ws/install/rm_bringup:/root/HRD_ws/ros2_ws/install/rm_65_config:/root/HRD_ws/ros2_ws/install/motion_planning:/opt/ros/humble'), ('PWD', '/root/HRD_ws/ros2_ws/src/motion_planning/build/motion_planning'), ('LC_ALL', 'C.UTF-8'), ('PYTHONPATH', '/root/HRD_ws/ros2_ws/install/rm_ros_interfaces/local/lib/python3.10/dist-packages:/opt/ros/humble/lib/python3.10/site-packages:/opt/ros/humble/local/lib/python3.10/dist-packages'), ('COLCON', '1'), ('CMAKE_PREFIX_PATH', '/root/HRD_ws/ros2_ws/install/rm_example:/root/HRD_ws/ros2_ws/install/rm_driver:/root/HRD_ws/ros2_ws/install/rm_control:/root/HRD_ws/ros2_ws/install/get_arm_state:/root/HRD_ws/ros2_ws/install/force_position_control:/root/HRD_ws/ros2_ws/install/control_arm_move:/root/HRD_ws/ros2_ws/install/rm_ros_interfaces:/root/HRD_ws/ros2_ws/install/rm_install:/root/HRD_ws/ros2_ws/install/rm_gen72_config:/root/HRD_ws/ros2_ws/install/rm_gazebo:/root/HRD_ws/ros2_ws/install/rm_eco65_config:/root/HRD_ws/ros2_ws/install/rm_eco63_config:/root/HRD_ws/ros2_ws/install/rm_doc:/root/HRD_ws/ros2_ws/install/rm_75_config:/root/HRD_ws/ros2_ws/install/rm_63_config:/root/HRD_ws/ros2_ws/install/rm_description:/root/HRD_ws/ros2_ws/install/rm_bringup:/root/HRD_ws/ros2_ws/install/rm_65_config:/root/HRD_ws/ros2_ws/install/motion_planning:/opt/ros/humble')]), 'shell': False}
+[1.579317] (motion_planning) StdoutLine: {'line': b'[ 50%] \x1b[32mBuilding CXX object CMakeFiles/planner_node.dir/src/planner_node.cpp.o\x1b[0m\n'}
+[1.579465] (motion_planning) StdoutLine: {'line': b'[ 50%] \x1b[32mBuilding CXX object CMakeFiles/mock_task_publisher.dir/src/mock_task_publisher.cpp.o\x1b[0m\n'}
+[1.601536] (-) TimerEvent: {}
+[1.701770] (-) TimerEvent: {}
+[1.802033] (-) TimerEvent: {}
+[1.902390] (-) TimerEvent: {}
+[2.002665] (-) TimerEvent: {}
+[2.103005] (-) TimerEvent: {}
+[2.203294] (-) TimerEvent: {}
+[2.303530] (-) TimerEvent: {}
+[2.403872] (-) TimerEvent: {}
+[2.504149] (-) TimerEvent: {}
+[2.604424] (-) TimerEvent: {}
+[2.704654] (-) TimerEvent: {}
+[2.804917] (-) TimerEvent: {}
+[2.905260] (-) TimerEvent: {}
+[3.005623] (-) TimerEvent: {}
+[3.105970] (-) TimerEvent: {}
+[3.206252] (-) TimerEvent: {}
+[3.306594] (-) TimerEvent: {}
+[3.406924] (-) TimerEvent: {}
+[3.507320] (-) TimerEvent: {}
+[3.607798] (-) TimerEvent: {}
+[3.708140] (-) TimerEvent: {}
+[3.808486] (-) TimerEvent: {}
+[3.908759] (-) TimerEvent: {}
+[4.009108] (-) TimerEvent: {}
+[4.090269] (motion_planning) StdoutLine: {'line': b'[ 75%] \x1b[32m\x1b[1mLinking CXX executable mock_task_publisher\x1b[0m\n'}
+[4.109334] (-) TimerEvent: {}
+[4.205494] (motion_planning) StdoutLine: {'line': b'[ 75%] Built target mock_task_publisher\n'}
+[4.209526] (-) TimerEvent: {}
+[4.309838] (-) TimerEvent: {}
+[4.410180] (-) TimerEvent: {}
+[4.510542] (-) TimerEvent: {}
+[4.610824] (-) TimerEvent: {}
+[4.711058] (-) TimerEvent: {}
+[4.811402] (-) TimerEvent: {}
+[4.911755] (-) TimerEvent: {}
+[5.012073] (-) TimerEvent: {}
+[5.112426] (-) TimerEvent: {}
+[5.212689] (-) TimerEvent: {}
+[5.312982] (-) TimerEvent: {}
+[5.413243] (-) TimerEvent: {}
+[5.513557] (-) TimerEvent: {}
+[5.613858] (-) TimerEvent: {}
+[5.714266] (-) TimerEvent: {}
+[5.814653] (-) TimerEvent: {}
+[5.915013] (-) TimerEvent: {}
+[6.015262] (-) TimerEvent: {}
+[6.115593] (-) TimerEvent: {}
+[6.215964] (-) TimerEvent: {}
+[6.316327] (-) TimerEvent: {}
+[6.416567] (-) TimerEvent: {}
+[6.516828] (-) TimerEvent: {}
+[6.617157] (-) TimerEvent: {}
+[6.717497] (-) TimerEvent: {}
+[6.817822] (-) TimerEvent: {}
+[6.918155] (-) TimerEvent: {}
+[7.018416] (-) TimerEvent: {}
+[7.118768] (-) TimerEvent: {}
+[7.219087] (-) TimerEvent: {}
+[7.319346] (-) TimerEvent: {}
+[7.419664] (-) TimerEvent: {}
+[7.519920] (-) TimerEvent: {}
+[7.620250] (-) TimerEvent: {}
+[7.720527] (-) TimerEvent: {}
+[7.820766] (-) TimerEvent: {}
+[7.921015] (-) TimerEvent: {}
+[8.021332] (-) TimerEvent: {}
+[8.121666] (-) TimerEvent: {}
+[8.221910] (-) TimerEvent: {}
+[8.322280] (-) TimerEvent: {}
+[8.422501] (-) TimerEvent: {}
+[8.522800] (-) TimerEvent: {}
+[8.623131] (-) TimerEvent: {}
+[8.723454] (-) TimerEvent: {}
+[8.823730] (-) TimerEvent: {}
+[8.924081] (-) TimerEvent: {}
+[9.024438] (-) TimerEvent: {}
+[9.124696] (-) TimerEvent: {}
+[9.145272] (motion_planning) StdoutLine: {'line': b'[100%] \x1b[32m\x1b[1mLinking CXX executable planner_node\x1b[0m\n'}
+[9.224796] (-) TimerEvent: {}
+[9.325091] (-) TimerEvent: {}
+[9.425470] (-) TimerEvent: {}
+[9.525788] (-) TimerEvent: {}
+[9.565976] (motion_planning) StdoutLine: {'line': b'[100%] Built target planner_node\n'}
+[9.572168] (motion_planning) CommandEnded: {'returncode': 0}
+[9.572821] (motion_planning) JobProgress: {'identifier': 'motion_planning', 'progress': 'install'}
+[9.578165] (motion_planning) Command: {'cmd': ['/usr/bin/cmake', '--install', '/root/HRD_ws/ros2_ws/src/motion_planning/build/motion_planning'], 'cwd': '/root/HRD_ws/ros2_ws/src/motion_planning/build/motion_planning', 'env': OrderedDict([('HOSTNAME', 'ether-Nitro-AN515-58'), ('SHLVL', '1'), ('LD_LIBRARY_PATH', '/root/HRD_ws/ros2_ws/install/rm_ros_interfaces/lib:/usr/lib/x86_64-linux-gnu/gazebo-11/plugins:/opt/ros/humble/opt/rviz_ogre_vendor/lib:/opt/ros/humble/lib/x86_64-linux-gnu:/opt/ros/humble/lib'), ('HOME', '/root'), ('OLDPWD', '/root/HRD_ws/ros2_ws/src/motion_planning/launch'), ('ROS_PYTHON_VERSION', '3'), ('COLCON_PREFIX_PATH', '/root/HRD_ws/ros2_ws/install'), ('ROS_DISTRO', 'humble'), ('_', '/usr/bin/colcon'), ('ROS_VERSION', '2'), ('TERM', 'xterm'), ('ROS_LOCALHOST_ONLY', '0'), ('PATH', '/opt/ros/humble/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'), ('DISPLAY', ':1'), ('LANG', 'C.UTF-8'), ('LS_COLORS', 'rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:mi=00:su=37;41:sg=30;43:ca=30;41:tw=30;42:ow=34;42:st=37;44:ex=01;32:*.tar=01;31:*.tgz=01;31:*.arc=01;31:*.arj=01;31:*.taz=01;31:*.lha=01;31:*.lz4=01;31:*.lzh=01;31:*.lzma=01;31:*.tlz=01;31:*.txz=01;31:*.tzo=01;31:*.t7z=01;31:*.zip=01;31:*.z=01;31:*.dz=01;31:*.gz=01;31:*.lrz=01;31:*.lz=01;31:*.lzo=01;31:*.xz=01;31:*.zst=01;31:*.tzst=01;31:*.bz2=01;31:*.bz=01;31:*.tbz=01;31:*.tbz2=01;31:*.tz=01;31:*.deb=01;31:*.rpm=01;31:*.jar=01;31:*.war=01;31:*.ear=01;31:*.sar=01;31:*.rar=01;31:*.alz=01;31:*.ace=01;31:*.zoo=01;31:*.cpio=01;31:*.7z=01;31:*.rz=01;31:*.cab=01;31:*.wim=01;31:*.swm=01;31:*.dwm=01;31:*.esd=01;31:*.jpg=01;35:*.jpeg=01;35:*.mjpg=01;35:*.mjpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.svg=01;35:*.svgz=01;35:*.mng=01;35:*.pcx=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.m2v=01;35:*.mkv=01;35:*.webm=01;35:*.webp=01;35:*.ogm=01;35:*.mp4=01;35:*.m4v=01;35:*.mp4v=01;35:*.vob=01;35:*.qt=01;35:*.nuv=01;35:*.wmv=01;35:*.asf=01;35:*.rm=01;35:*.rmvb=01;35:*.flc=01;35:*.avi=01;35:*.fli=01;35:*.flv=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:*.yuv=01;35:*.cgm=01;35:*.emf=01;35:*.ogv=01;35:*.ogx=01;35:*.aac=00;36:*.au=00;36:*.flac=00;36:*.m4a=00;36:*.mid=00;36:*.midi=00;36:*.mka=00;36:*.mp3=00;36:*.mpc=00;36:*.ogg=00;36:*.ra=00;36:*.wav=00;36:*.oga=00;36:*.opus=00;36:*.spx=00;36:*.xspf=00;36:'), ('AMENT_PREFIX_PATH', '/root/HRD_ws/ros2_ws/install/rm_example:/root/HRD_ws/ros2_ws/install/rm_driver:/root/HRD_ws/ros2_ws/install/rm_control:/root/HRD_ws/ros2_ws/install/get_arm_state:/root/HRD_ws/ros2_ws/install/force_position_control:/root/HRD_ws/ros2_ws/install/control_arm_move:/root/HRD_ws/ros2_ws/install/rm_ros_interfaces:/root/HRD_ws/ros2_ws/install/rm_install:/root/HRD_ws/ros2_ws/install/rm_gen72_config:/root/HRD_ws/ros2_ws/install/rm_gazebo:/root/HRD_ws/ros2_ws/install/rm_eco65_config:/root/HRD_ws/ros2_ws/install/rm_eco63_config:/root/HRD_ws/ros2_ws/install/rm_doc:/root/HRD_ws/ros2_ws/install/rm_75_config:/root/HRD_ws/ros2_ws/install/rm_63_config:/root/HRD_ws/ros2_ws/install/rm_description:/root/HRD_ws/ros2_ws/install/rm_bringup:/root/HRD_ws/ros2_ws/install/rm_65_config:/root/HRD_ws/ros2_ws/install/motion_planning:/opt/ros/humble'), ('PWD', '/root/HRD_ws/ros2_ws/src/motion_planning/build/motion_planning'), ('LC_ALL', 'C.UTF-8'), ('PYTHONPATH', '/root/HRD_ws/ros2_ws/install/rm_ros_interfaces/local/lib/python3.10/dist-packages:/opt/ros/humble/lib/python3.10/site-packages:/opt/ros/humble/local/lib/python3.10/dist-packages'), ('COLCON', '1'), ('CMAKE_PREFIX_PATH', '/root/HRD_ws/ros2_ws/install/rm_example:/root/HRD_ws/ros2_ws/install/rm_driver:/root/HRD_ws/ros2_ws/install/rm_control:/root/HRD_ws/ros2_ws/install/get_arm_state:/root/HRD_ws/ros2_ws/install/force_position_control:/root/HRD_ws/ros2_ws/install/control_arm_move:/root/HRD_ws/ros2_ws/install/rm_ros_interfaces:/root/HRD_ws/ros2_ws/install/rm_install:/root/HRD_ws/ros2_ws/install/rm_gen72_config:/root/HRD_ws/ros2_ws/install/rm_gazebo:/root/HRD_ws/ros2_ws/install/rm_eco65_config:/root/HRD_ws/ros2_ws/install/rm_eco63_config:/root/HRD_ws/ros2_ws/install/rm_doc:/root/HRD_ws/ros2_ws/install/rm_75_config:/root/HRD_ws/ros2_ws/install/rm_63_config:/root/HRD_ws/ros2_ws/install/rm_description:/root/HRD_ws/ros2_ws/install/rm_bringup:/root/HRD_ws/ros2_ws/install/rm_65_config:/root/HRD_ws/ros2_ws/install/motion_planning:/opt/ros/humble')]), 'shell': False}
+[9.581942] (motion_planning) StdoutLine: {'line': b'-- Install configuration: ""\n'}
+[9.582136] (motion_planning) StdoutLine: {'line': b'-- Installing: /root/HRD_ws/ros2_ws/src/motion_planning/install/motion_planning/lib/motion_planning/planner_node\n'}
+[9.583975] (motion_planning) StdoutLine: {'line': b'-- Set runtime path of "/root/HRD_ws/ros2_ws/src/motion_planning/install/motion_planning/lib/motion_planning/planner_node" to ""\n'}
+[9.584134] (motion_planning) StdoutLine: {'line': b'-- Installing: /root/HRD_ws/ros2_ws/src/motion_planning/install/motion_planning/lib/motion_planning/mock_task_publisher\n'}
+[9.584495] (motion_planning) StdoutLine: {'line': b'-- Set runtime path of "/root/HRD_ws/ros2_ws/src/motion_planning/install/motion_planning/lib/motion_planning/mock_task_publisher" to ""\n'}
+[9.584694] (motion_planning) StdoutLine: {'line': b'-- Installing: /root/HRD_ws/ros2_ws/src/motion_planning/install/motion_planning/share/motion_planning/launch\n'}
+[9.584881] (motion_planning) StdoutLine: {'line': b'-- Installing: /root/HRD_ws/ros2_ws/src/motion_planning/install/motion_planning/share/motion_planning/launch/mtc_demo.launch.py\n'}
+[9.584970] (motion_planning) StdoutLine: {'line': b'-- Installing: /root/HRD_ws/ros2_ws/src/motion_planning/install/motion_planning/share/ament_index/resource_index/package_run_dependencies/motion_planning\n'}
+[9.585120] (motion_planning) StdoutLine: {'line': b'-- Installing: /root/HRD_ws/ros2_ws/src/motion_planning/install/motion_planning/share/ament_index/resource_index/parent_prefix_path/motion_planning\n'}
+[9.585207] (motion_planning) StdoutLine: {'line': b'-- Installing: /root/HRD_ws/ros2_ws/src/motion_planning/install/motion_planning/share/motion_planning/environment/ament_prefix_path.sh\n'}
+[9.585380] (motion_planning) StdoutLine: {'line': b'-- Installing: /root/HRD_ws/ros2_ws/src/motion_planning/install/motion_planning/share/motion_planning/environment/ament_prefix_path.dsv\n'}
+[9.585449] (motion_planning) StdoutLine: {'line': b'-- Installing: /root/HRD_ws/ros2_ws/src/motion_planning/install/motion_planning/share/motion_planning/environment/path.sh\n'}
+[9.585511] (motion_planning) StdoutLine: {'line': b'-- Installing: /root/HRD_ws/ros2_ws/src/motion_planning/install/motion_planning/share/motion_planning/environment/path.dsv\n'}
+[9.585571] (motion_planning) StdoutLine: {'line': b'-- Installing: /root/HRD_ws/ros2_ws/src/motion_planning/install/motion_planning/share/motion_planning/local_setup.bash\n'}
+[9.585637] (motion_planning) StdoutLine: {'line': b'-- Installing: /root/HRD_ws/ros2_ws/src/motion_planning/install/motion_planning/share/motion_planning/local_setup.sh\n'}
+[9.585696] (motion_planning) StdoutLine: {'line': b'-- Installing: /root/HRD_ws/ros2_ws/src/motion_planning/install/motion_planning/share/motion_planning/local_setup.zsh\n'}
+[9.585754] (motion_planning) StdoutLine: {'line': b'-- Installing: /root/HRD_ws/ros2_ws/src/motion_planning/install/motion_planning/share/motion_planning/local_setup.dsv\n'}
+[9.585812] (motion_planning) StdoutLine: {'line': b'-- Installing: /root/HRD_ws/ros2_ws/src/motion_planning/install/motion_planning/share/motion_planning/package.dsv\n'}
+[9.585869] (motion_planning) StdoutLine: {'line': b'-- Installing: /root/HRD_ws/ros2_ws/src/motion_planning/install/motion_planning/share/ament_index/resource_index/packages/motion_planning\n'}
+[9.585927] (motion_planning) StdoutLine: {'line': b'-- Installing: /root/HRD_ws/ros2_ws/src/motion_planning/install/motion_planning/share/motion_planning/cmake/motion_planningConfig.cmake\n'}
+[9.585986] (motion_planning) StdoutLine: {'line': b'-- Installing: /root/HRD_ws/ros2_ws/src/motion_planning/install/motion_planning/share/motion_planning/cmake/motion_planningConfig-version.cmake\n'}
+[9.586049] (motion_planning) StdoutLine: {'line': b'-- Installing: /root/HRD_ws/ros2_ws/src/motion_planning/install/motion_planning/share/motion_planning/package.xml\n'}
+[9.587014] (motion_planning) CommandEnded: {'returncode': 0}
+[9.599604] (motion_planning) JobEnded: {'identifier': 'motion_planning', 'rc': 0}
+[9.600067] (-) EventReactorShutdown: {}

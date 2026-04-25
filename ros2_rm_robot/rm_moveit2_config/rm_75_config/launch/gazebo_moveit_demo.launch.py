@@ -37,7 +37,7 @@ def my_generate_move_group_launch(ld, moveit_config):
         DeclareBooleanLaunchArg("publish_monitored_planning_scene", default_value=True)
     )
     # load non-default MoveGroup capabilities (space separated)
-    ld.add_action(DeclareLaunchArgument("capabilities", default_value=""))
+    ld.add_action(DeclareLaunchArgument("capabilities", default_value="moveit_task_constructor/ExecuteTaskSolutionCapability"))
     # inhibit these default MoveGroup capabilities (space separated)
     ld.add_action(DeclareLaunchArgument("disable_capabilities", default_value=""))
 
