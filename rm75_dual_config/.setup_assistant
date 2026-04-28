@@ -1,0 +1,10 @@
+moveit_setup_assistant_config:
+  urdf:
+    package: rm_description
+    relative_path: urdf/rm_75_dual.urdf.xacro
+  srdf:
+    relative_path: config/rm_75_dual.srdf
+  package_settings:
+    author_name: HTT
+    author_email: 15216968378@163.com
+    generated_timestamp: 1777305187

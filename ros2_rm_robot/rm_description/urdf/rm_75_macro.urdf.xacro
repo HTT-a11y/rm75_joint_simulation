@@ -1,11 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
-<robot  name="rm_75_description" xmlns:xacro="http://www.ros.org/wiki/xacro">
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <xacro:macro name="rm_75_robot" params="prefix parent *origin">
+    <joint name="${prefix}base_joint" type="fixed">
+      <xacro:insert_block name="origin" />
+      <parent link="${parent}" />
+      <child link="${prefix}base_link" />
+    </joint>
+
+
 <!-- link6_type -->
-<xacro:arg name="link7_type" default="Link7" />
+
 <!-- arg->property -->
-<xacro:property name="link7_type" value="$(arg link7_type)" />
+
     <link
-    name="base_link">
+    name="${prefix}base_link">
     <inertial>
       <origin
         xyz="0.000433268851866144 3.54527840972405E-05 0.0599427623574736"
@@ -45,7 +53,7 @@
     </collision>
   </link>
   <link
-    name="Link1">
+    name="${prefix}Link1">
     <inertial>
       <origin
         xyz="0.0251854224372461 1.19160585601655E-08 -0.021107996993288"
@@ -85,15 +93,15 @@
     </collision>
   </link>
   <joint
-    name="joint1"
+    name="${prefix}joint1"
     type="revolute">
     <origin
       xyz="0 0 0.2405"
       rpy="-1.5708 0 0" />
     <parent
-      link="base_link" />
+      link="${prefix}base_link" />
     <child
-      link="Link1" />
+      link="${prefix}Link1" />
     <axis
       xyz="0 -1 0" />
     <limit
@@ -103,7 +111,7 @@
       velocity="3.14" />
   </joint>
   <link
-    name="Link2">
+    name="${prefix}Link2">
     <inertial>
       <origin
         xyz="2.72859133252335E-07 0.011077753037361 0.0761295106490881"
@@ -143,15 +151,15 @@
     </collision>
   </link>
   <joint
-    name="joint2"
+    name="${prefix}joint2"
     type="revolute">
     <origin
       xyz="0 0 0"
       rpy="1.5708 0 0" />
     <parent
-      link="Link1" />
+      link="${prefix}Link1" />
     <child
-      link="Link2" />
+      link="${prefix}Link2" />
     <axis
       xyz="0 1 0" />
     <limit
@@ -161,7 +169,7 @@
       velocity="3.14" />
   </joint>
   <link
-    name="Link3">
+    name="${prefix}Link3">
     <inertial>
       <origin
         xyz="6.84676164566044E-07 0.0273475408308154 -0.0235440119707943"
@@ -201,15 +209,15 @@
     </collision>
   </link>
   <joint
-    name="joint3"
+    name="${prefix}joint3"
     type="revolute">
     <origin
       xyz="0 0 0.256"
       rpy="-1.5708 0 0" />
     <parent
-      link="Link2" />
+      link="${prefix}Link2" />
     <child
-      link="Link3" />
+      link="${prefix}Link3" />
     <axis
       xyz="0 -1 0" />
     <limit
@@ -219,7 +227,7 @@
       velocity="3.92" />
   </joint>
   <link
-    name="Link4">
+    name="${prefix}Link4">
     <inertial>
       <origin
         xyz="5.05312670298932E-06 0.0105690692118619 0.0595925663703773"
@@ -259,15 +267,15 @@
     </collision>
   </link>
   <joint
-    name="joint4"
+    name="${prefix}joint4"
     type="revolute">
     <origin
       xyz="0 0 0"
       rpy="1.5708 0 0" />
     <parent
-      link="Link3" />
+      link="${prefix}Link3" />
     <child
-      link="Link4" />
+      link="${prefix}Link4" />
     <axis
       xyz="0 1 0" />
     <limit
@@ -277,7 +285,7 @@
       velocity="3.92" />
   </joint>
   <link
-    name="Link5">
+    name="${prefix}Link5">
     <inertial>
       <origin
         xyz="1.1551661767744E-06 0.0215394748352686 -0.0180424468598241"
@@ -317,15 +325,15 @@
     </collision>
   </link>
   <joint
-    name="joint5"
+    name="${prefix}joint5"
     type="revolute">
     <origin
       xyz="0 0 0.21"
       rpy="-1.5708 0 0" />
     <parent
-      link="Link4" />
+      link="${prefix}Link4" />
     <child
-      link="Link5" />
+      link="${prefix}Link5" />
     <axis
       xyz="0 -1 0" />
     <limit
@@ -335,7 +343,7 @@
       velocity="3.92" />
   </joint>
   <link
-    name="Link6">
+    name="${prefix}Link6">
     <inertial>
       <origin
         xyz="3.19794787018954E-06 0.00736804250989373 0.0593808368101291"
@@ -375,15 +383,15 @@
     </collision>
   </link>
   <joint
-    name="joint6"
+    name="${prefix}joint6"
     type="revolute">
     <origin
       xyz="0 0 0"
       rpy="1.5708 0 0" />
     <parent
-      link="Link5" />
+      link="${prefix}Link5" />
     <child
-      link="Link6" />
+      link="${prefix}Link6" />
     <axis
       xyz="0 1 0" />
     <limit
@@ -394,7 +402,7 @@
   </joint>
   <xacro:if value="${ link7_type =='Link7' }">
   <link
-    name="Link7">
+    name="${prefix}Link7">
     <inertial>
       <origin
         xyz="0.000714238382876259 -0.000396711987952758 -0.0126723660946126"
@@ -434,15 +442,15 @@
     </collision>
   </link>
   <joint
-    name="joint7"
+    name="${prefix}joint7"
     type="revolute">
     <origin
       xyz="0 0 0.144"
       rpy="0 0 0" />
     <parent
-      link="Link6" />
+      link="${prefix}Link6" />
     <child
-      link="Link7" />
+      link="${prefix}Link7" />
     <axis
       xyz="0 0 1" />
     <limit
@@ -454,7 +462,7 @@
   </xacro:if>
   <xacro:if value="${ link7_type =='Link7_6f' }">
     <link
-    name="Link7">
+    name="${prefix}Link7">
     <inertial>
       <origin
         xyz="0.00032231 -0.0001782 -0.028676"
@@ -494,15 +502,15 @@
     </collision>
   </link>
   <joint
-    name="joint7"
+    name="${prefix}joint7"
     type="revolute">
     <origin
       xyz="0 0 0.1725"
       rpy="0 0 0" />
     <parent
-      link="Link6" />
+      link="${prefix}Link6" />
     <child
-      link="Link7" />
+      link="${prefix}Link7" />
     <axis
       xyz="0 0 1" />
     <limit
@@ -514,7 +522,7 @@
   </xacro:if>
     <xacro:if value="${ link7_type =='Link7_6fb' }">
     <link
-    name="Link7">
+    name="${prefix}Link7">
     <inertial>
       <origin
         xyz="0.00032231 -0.0001782 -0.028676"
@@ -554,15 +562,15 @@
     </collision>
   </link>
   <joint
-    name="joint7"
+    name="${prefix}joint7"
     type="revolute">
     <origin
       xyz="0 0 0.1612"
       rpy="0 0 0" />
     <parent
-      link="Link6" />
+      link="${prefix}Link6" />
     <child
-      link="Link7" />
+      link="${prefix}Link7" />
     <axis
       xyz="0 0 1" />
     <limit
@@ -572,4 +580,7 @@
       velocity="3.14" />
   </joint>
   </xacro:if>
+
+
+  </xacro:macro>
 </robot>

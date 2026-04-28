@@ -1,0 +1,41 @@
+<?xml version="1.0"?>
+<robot name="rm_75_dual" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <xacro:property name="link7_type" value="Link7"/>
+
+  <xacro:include filename="$(find rm_description)/urdf/rm_75_macro.urdf.xacro" />
+  
+  <link name="world"/>
+
+  <link name="table_link">
+    <visual>
+      <origin xyz="0 0 0.5" rpy="0 0 0"/>
+      <geometry><box size="1.2 0.8 1.0"/></geometry>
+      <material name="wood"><color rgba="0.8 0.6 0.4 1.0"/></material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0.5" rpy="0 0 0"/>
+      <geometry><box size="1.2 0.8 1.0"/></geometry>
+    </collision>
+    <inertial>
+      <origin xyz="0 0 0.5" rpy="0 0 0"/>
+      <mass value="50.0"/>
+      <inertia ixx="1.0" ixy="0.0" ixz="0.0" iyy="1.0" iyz="0.0" izz="1.0"/>
+    </inertial>
+  </link>
+
+  <joint name="world_to_table" type="fixed">
+    <parent link="world"/>
+    <child link="table_link"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
+
+  <xacro:rm_75_robot prefix="left_" parent="table_link">
+    <origin xyz="0 0.25 1.0" rpy="0 0 0"/> 
+  </xacro:rm_75_robot>
+
+  <xacro:rm_75_robot prefix="right_" parent="table_link">
+    <origin xyz="0 -0.25 1.0" rpy="0 0 0"/>
+  </xacro:rm_75_robot>
+
+</robot>
