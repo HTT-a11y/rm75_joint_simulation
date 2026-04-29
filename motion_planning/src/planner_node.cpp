@@ -1,130 +1,108 @@
 #include <rclcpp/rclcpp.hpp>
-#include <geometry_msgs/msg/pose.hpp>
-
-#include <moveit/planning_scene_interface/planning_scene_interface.h>
 #include <moveit/task_constructor/task.h>
 #include <moveit/task_constructor/stages/current_state.h>
 #include <moveit/task_constructor/stages/move_to.h>
-#include <moveit/task_constructor/stages/move_relative.h>
 #include <moveit/task_constructor/solvers/pipeline_planner.h>
-#include <moveit/task_constructor/solvers/cartesian_path.h>
+#include <moveit/task_constructor/solvers/joint_interpolation.h>
 
-using namespace std::chrono_literals;
+using namespace moveit::task_constructor;
 
-class MTCPlannerNode : public rclcpp::Node
-{
-public:
-    MTCPlannerNode(const rclcpp::NodeOptions &options)
-        : Node("mtc_planner_node", options)
-    {
-        subscription_ = this->create_subscription<geometry_msgs::msg::Pose>(
-            "/task_command", 10,
-            std::bind(&MTCPlannerNode::taskCallback, this, std::placeholders::_1));
-            
-        RCLCPP_INFO(this->get_logger(), "MTC 规划节点已启动，等待接收任务点...");
-    }
-
-private:
-    void taskCallback(const geometry_msgs::msg::Pose::SharedPtr msg)
-    {
-        RCLCPP_INFO(this->get_logger(), "收到任务目标，开始构建 MTC 抓取放置流水线...");
-        
-        // --- 1. 创建 MTC 求解器 ---
-        auto sampling_planner = std::make_shared<moveit::task_constructor::solvers::PipelinePlanner>(this->shared_from_this(), "ompl");
-        auto cartesian_planner = std::make_shared<moveit::task_constructor::solvers::CartesianPath>();
-        cartesian_planner->setMaxVelocityScalingFactor(0.1); 
-
-        // --- 2. 初始化整个任务剧本 ---
-        moveit::task_constructor::Task task("pick_and_place_task");
-        task.loadRobotModel(this->shared_from_this());
-
-        const std::string arm_group_name = "rm_group"; 
-        
-        // 核心亮点：不要再去瞎猜模型里的名字，直接让底层动态查询你的 URDF
-        const std::string root_frame = task.getRobotModel()->getModelFrame();
-        const std::string eef_name = task.getRobotModel()->getJointModelGroup(arm_group_name)->getLinkModelNames().back();
-        RCLCPP_INFO(this->get_logger(), "自动推断成功！根坐标系: [%s], 末端连杆: [%s]", root_frame.c_str(), eef_name.c_str());
-
-        // --- 3. 往剧本里添加 Stage ---
-        // 阶段 0：Current State
-        task.add(std::make_unique<moveit::task_constructor::stages::CurrentState>("Current State"));
-
-        // 阶段 1：飞向抓取前置点
-        {
-            auto stage = std::make_unique<moveit::task_constructor::stages::MoveTo>("Move To Pre-Pick", sampling_planner);
-            stage->setGroup(arm_group_name);
-            stage->setIKFrame(eef_name);
-            
-            geometry_msgs::msg::Pose pre_pick_pose = *msg;
-            pre_pick_pose.position.z += 0.1; // 目标上方 10cm
-            
-            geometry_msgs::msg::PoseStamped pose_stamped;
-            pose_stamped.header.frame_id = root_frame;
-            pose_stamped.pose = pre_pick_pose;
-            
-            stage->setGoal(pose_stamped);
-            task.add(std::move(stage));
-        }
-
-        // 阶段 2：笛卡尔直线下降去抓
-        {
-            auto stage = std::make_unique<moveit::task_constructor::stages::MoveRelative>("Approach Pick", cartesian_planner);
-            stage->setGroup(arm_group_name);
-            stage->setIKFrame(eef_name);
-            
-            geometry_msgs::msg::Vector3Stamped direction;
-            direction.header.frame_id = root_frame;
-            direction.vector.z = -0.05; // 垂直下降
-            
-            stage->setDirection(direction);
-            task.add(std::move(stage));
-        }
-
-        // 阶段 3：笛卡尔直线上升提起
-        {
-            auto stage = std::make_unique<moveit::task_constructor::stages::MoveRelative>("Lift Object", cartesian_planner);
-            stage->setGroup(arm_group_name);
-            stage->setIKFrame(eef_name);
-            
-            geometry_msgs::msg::Vector3Stamped direction;
-            direction.header.frame_id = root_frame;
-            direction.vector.z = 0.15; // 垂直上升
-            
-            stage->setDirection(direction);
-            task.add(std::move(stage));
-        }
-
-        // --- 4. 执行规划与发布 ---
-        try {
-            RCLCPP_INFO(this->get_logger(), "剧本编写完毕，开始在头脑中推演 (Plan)...");
-            if (task.plan(1)) { 
-                RCLCPP_INFO(this->get_logger(), "推演成功！开始向底层发送执行指令 (Execute)...");
-                task.execute(*task.solutions().front());
-                RCLCPP_INFO(this->get_logger(), "执行完成。");
-            } else {
-                RCLCPP_ERROR(this->get_logger(), "推演失败，机械臂在某个阶段卡住了。");
-            }
-        } catch (const std::exception& e) {
-            RCLCPP_ERROR(this->get_logger(), "MTC 报错: %s", e.what());
-        }
-    }
-
-    rclcpp::Subscription<geometry_msgs::msg::Pose>::SharedPtr subscription_;
-};
-
-int main(int argc, char *argv[])
-{
+int main(int argc, char** argv) {
     rclcpp::init(argc, argv);
+    
     rclcpp::NodeOptions options;
     options.automatically_declare_parameters_from_overrides(true);
-    
-    auto mtc_node = std::make_shared<MTCPlannerNode>(options);
+    auto node = rclcpp::Node::make_shared("mtc_dual_arm_planner", options);
 
-    // MTC 强烈建议使用多线程执行器
+    // 开启一个独立线程来处理 ROS 状态回调
     rclcpp::executors::MultiThreadedExecutor executor;
-    executor.add_node(mtc_node);
-    executor.spin();
+    auto spin_thread = std::thread([&executor, &node]() {
+        executor.add_node(node);
+        executor.spin();
+        executor.remove_node(node);
+    });
 
+    RCLCPP_INFO(node->get_logger(), "MTC 双臂规划节点已启动，正在构建 Stage 1...");
+
+    // 1. 创建任务并加载机器人模型
+    Task task;
+    task.stages()->setName("Dual Arm Pre-Grasp");
+    task.loadRobotModel(node);
+
+    // 2. 设置基础规划器 (使用 OMPL)
+    auto pipeline_planner = std::make_shared<solvers::PipelinePlanner>(node);
+    pipeline_planner->setPlannerId("");
+
+    // ===================================================================
+    // 🎭 Stage 0: 获取当前机器人的真实状态
+    // ===================================================================
+    task.add(std::make_unique<stages::CurrentState>("Current State"));
+
+    // ===================================================================
+    // 🎭 Stage 1-A: 左臂独立运动到预备点
+    // ===================================================================
+    // 💥 新增：创建一个自带时间参数化的关节插值求解器 💥
+    auto interpolation_planner = std::make_shared<solvers::JointInterpolationPlanner>();
+
+    // ===================================================================
+    // 🎭 Stage 1-A: 左臂独立运动到预备点
+    // ===================================================================
+    // 💥 注意：这里把第二个参数换成了 interpolation_planner 💥
+    auto move_left = std::make_unique<stages::MoveTo>("Left Arm Pre-Grasp", interpolation_planner); 
+    move_left->setGroup("left_arm");
+    // 使用字典直接设定关节目标角度 (单位: 弧度)
+    // 这里设定一个假想的“向内靠拢”的预备姿态，你可以根据实际情况调整数值
+    std::map<std::string, double> left_target = {
+        {"left_joint1", 0.5},
+        {"left_joint2", 0.5},
+        {"left_joint3", 0.0},
+        {"left_joint4", 0.5},
+        {"left_joint5", 0.0},
+        {"left_joint6", 0.0},
+        {"left_joint7", 0.0}
+    };
+    move_left->setGoal(left_target);
+    task.add(std::move(move_left));
+
+    // ===================================================================
+    // 🎭 Stage 1-B: 右臂独立运动到预备点
+    // ===================================================================
+    auto move_right = std::make_unique<stages::MoveTo>("Right Arm Pre-Grasp", interpolation_planner);
+    move_right->setGroup("right_arm");
+    
+    // 右臂同样向内靠拢，形成准备合抱的姿态
+    std::map<std::string, double> right_target = {
+        {"right_joint1", -0.5},
+        {"right_joint2", 0.5},
+        {"right_joint3", 0.0},
+        {"right_joint4", 0.5},
+        {"right_joint5", 0.0},
+        {"right_joint6", 0.0},
+        {"right_joint7", 0.0}
+    };
+    move_right->setGoal(right_target);
+    task.add(std::move(move_right));
+
+    // ===================================================================
+    // 🚀 执行推演与规划
+    // ===================================================================
+    try {
+        task.init();
+        
+        RCLCPP_INFO(node->get_logger(), "开始推演...");
+        if (task.plan(5)) { // 最多生成 5 种备选方案
+            RCLCPP_INFO(node->get_logger(), "推演成功！准备执行...");
+            task.execute(*task.solutions().front()); // 执行最优解
+            RCLCPP_INFO(node->get_logger(), "执行完成！");
+        } else {
+            RCLCPP_ERROR(node->get_logger(), "推演失败，请检查碰撞或奇异点。");
+        }
+    } catch (const InitStageException& e) {
+        RCLCPP_ERROR_STREAM(node->get_logger(), "初始化失败: " << e.what());
+    }
+
+    // 优雅退出
     rclcpp::shutdown();
+    spin_thread.join();
     return 0;
 }

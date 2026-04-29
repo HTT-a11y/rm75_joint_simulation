@@ -1,25 +1,17 @@
-# This config file is used by ros2_control
 controller_manager:
   ros__parameters:
-    update_rate: 100  # Hz
-
+    update_rate: 1000  # 💥 极其关键！没有它，Gazebo 插件就会直接罢工 💥
+    use_sim_time: true
+    joint_state_broadcaster:
+      type: joint_state_broadcaster/JointStateBroadcaster
     left_arm_controller:
       type: joint_trajectory_controller/JointTrajectoryController
-
-
     right_arm_controller:
       type: joint_trajectory_controller/JointTrajectoryController
 
-
-    dual_arm_controller:
-      type: joint_trajectory_controller/JointTrajectoryController
-
-
-    joint_state_broadcaster:
-      type: joint_state_broadcaster/JointStateBroadcaster
-
 left_arm_controller:
   ros__parameters:
+    use_sim_time: true
     joints:
       - left_joint1
       - left_joint2
@@ -29,11 +21,17 @@ left_arm_controller:
       - left_joint6
       - left_joint7
     command_interfaces:
-      []
+      - position
     state_interfaces:
-      []
+      - position
+      - velocity
+    state_publish_rate: 100.0
+    action_monitor_rate: 20.0
+    allow_partial_joints_goal: false
+
 right_arm_controller:
   ros__parameters:
+    use_sim_time: true
     joints:
       - right_joint1
       - right_joint2
@@ -43,27 +41,10 @@ right_arm_controller:
       - right_joint6
       - right_joint7
     command_interfaces:
-      []
+      - position
     state_interfaces:
-      []
-dual_arm_controller:
-  ros__parameters:
-    joints:
-      - left_joint1
-      - left_joint2
-      - left_joint3
-      - left_joint4
-      - left_joint5
-      - left_joint6
-      - left_joint7
-      - right_joint1
-      - right_joint2
-      - right_joint3
-      - right_joint4
-      - right_joint5
-      - right_joint6
-      - right_joint7
-    command_interfaces:
-      []
-    state_interfaces:
-      []
+      - position
+      - velocity
+    state_publish_rate: 100.0
+    action_monitor_rate: 20.0
+    allow_partial_joints_goal: false

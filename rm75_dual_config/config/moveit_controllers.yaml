@@ -1,5 +1,4 @@
-# MoveIt uses this configuration for controller management
-
+# 这个文件告诉 MoveIt：当你需要执行动作时，去找下面这三个真实存在的 ROS 2 Controllers 发送指令。
 moveit_controller_manager: moveit_simple_controller_manager/MoveItSimpleControllerManager
 
 moveit_simple_controller_manager:
@@ -10,6 +9,8 @@ moveit_simple_controller_manager:
 
   left_arm_controller:
     type: FollowJointTrajectory
+    action_ns: follow_joint_trajectory
+    default: true
     joints:
       - left_joint1
       - left_joint2
@@ -18,8 +19,11 @@ moveit_simple_controller_manager:
       - left_joint5
       - left_joint6
       - left_joint7
+
   right_arm_controller:
     type: FollowJointTrajectory
+    action_ns: follow_joint_trajectory
+    default: true
     joints:
       - right_joint1
       - right_joint2
@@ -28,8 +32,11 @@ moveit_simple_controller_manager:
       - right_joint5
       - right_joint6
       - right_joint7
+
   dual_arm_controller:
     type: FollowJointTrajectory
+    action_ns: follow_joint_trajectory
+    default: true
     joints:
       - left_joint1
       - left_joint2

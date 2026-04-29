@@ -38,4 +38,11 @@
     <origin xyz="0 -0.25 1.0" rpy="0 0 0"/>
   </xacro:rm_75_robot>
 
+  <gazebo>
+    <plugin filename="libgazebo_ros2_control.so" name="gazebo_ros2_control">
+      <parameters>$(find rm75_dual_config)/config/ros2_controllers.yaml</parameters>
+      <robot_param_node>robot_state_publisher</robot_param_node>
+    </plugin>
+  </gazebo>
+
 </robot>
