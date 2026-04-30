@@ -13,6 +13,8 @@ find_package(geometry_msgs REQUIRED)
 find_package(shape_msgs REQUIRED)
 find_package(moveit_task_constructor_core REQUIRED)
 find_package(moveit_task_constructor_msgs REQUIRED)
+find_package(tf2 REQUIRED)
+find_package(tf2_geometry_msgs REQUIRED)
 
 # 编译节点
 add_executable(planner_node src/planner_node.cpp)
@@ -26,6 +28,8 @@ ament_target_dependencies(planner_node
   shape_msgs
   moveit_task_constructor_core
   moveit_task_constructor_msgs
+  tf2
+  tf2_geometry_msgs
 )
 
 # 编译模拟发布者节点 (Publisher)
