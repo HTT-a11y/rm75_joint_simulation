@@ -8,6 +8,9 @@ endif()
 # find dependencies
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(rclcpp_action REQUIRED)
+find_package(control_msgs REQUIRED)
+find_package(moveit_core REQUIRED)
 find_package(moveit_ros_planning_interface REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(shape_msgs REQUIRED)
@@ -23,6 +26,9 @@ target_include_directories(planner_node PUBLIC
   $<INSTALL_INTERFACE:include>)
 ament_target_dependencies(planner_node
   rclcpp
+  rclcpp_action
+  control_msgs
+  moveit_core
   moveit_ros_planning_interface
   geometry_msgs
   shape_msgs
