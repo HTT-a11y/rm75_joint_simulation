@@ -8,11 +8,14 @@
 
 #include <moveit/robot_state/robot_state.h>
 #include <moveit/robot_trajectory/robot_trajectory.h>
+#include <moveit/planning_scene_interface/planning_scene_interface.h>
 #include <moveit_msgs/msg/robot_state.hpp>
+#include <moveit_msgs/msg/attached_collision_object.hpp>
 
 #include <control_msgs/action/follow_joint_trajectory.hpp>
 #include <trajectory_msgs/msg/joint_trajectory.hpp>
 
+#include <shape_msgs/msg/solid_primitive.hpp>
 #include <geometry_msgs/msg/pose.hpp>
 #include <geometry_msgs/msg/pose_stamped.hpp>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
@@ -21,6 +24,7 @@
 #include <thread>
 #include <future>
 #include <sstream>
+#include <cmath>
 
 using namespace moveit::task_constructor;
 using FollowJointTrajectory = control_msgs::action::FollowJointTrajectory;
@@ -188,6 +192,67 @@ geometry_msgs::msg::Pose eigenToPose(const Eigen::Isometry3d& t)
 }
 
 // ---------------------------------------------------------------------------
+// 碰撞场景管理
+// ---------------------------------------------------------------------------
+
+// 添加一个 BOX 碰撞对象到规划场景
+void addCollisionBox(
+    moveit::planning_interface::PlanningSceneInterface& psi,
+    const std::string& id,
+    double x, double y, double z,
+    double sx, double sy, double sz)
+{
+    moveit_msgs::msg::CollisionObject obj;
+    obj.id = id;
+    obj.header.frame_id = "world";
+    obj.operation = moveit_msgs::msg::CollisionObject::ADD;
+
+    shape_msgs::msg::SolidPrimitive box;
+    box.type = shape_msgs::msg::SolidPrimitive::BOX;
+    box.dimensions = {sx, sy, sz};
+
+    geometry_msgs::msg::Pose pose;
+    pose.position.x = x;
+    pose.position.y = y;
+    pose.position.z = z;
+    pose.orientation.w = 1.0;
+
+    obj.primitives.push_back(box);
+    obj.primitive_poses.push_back(pose);
+    psi.applyCollisionObject(obj);
+}
+
+// 移除指定碰撞对象
+void removeCollisionObject(
+    moveit::planning_interface::PlanningSceneInterface& psi,
+    const std::string& id)
+{
+    moveit_msgs::msg::CollisionObject obj;
+    obj.id = id;
+    obj.header.frame_id = "world";
+    obj.operation = moveit_msgs::msg::CollisionObject::REMOVE;
+    psi.applyCollisionObject(obj);
+}
+
+// 将碰撞对象附着到末端连杆（模拟夹持）
+void attachObject(
+    moveit::planning_interface::PlanningSceneInterface& psi,
+    const std::string& id,
+    const std::string& parent_link,
+    const std::vector<std::string>& touch_links)
+{
+    moveit_msgs::msg::AttachedCollisionObject aco;
+    aco.link_name = parent_link;
+    aco.object.id = id;
+    aco.object.operation = moveit_msgs::msg::CollisionObject::ADD;
+    aco.touch_links = touch_links;
+    psi.applyAttachedCollisionObject(aco);
+
+    // 同时移除环境中的对象
+    removeCollisionObject(psi, id);
+}
+
+// ---------------------------------------------------------------------------
 // 协同运动阶段：保持左右末端相对位姿, 按位移生成新目标, IK, 规划, 执行
 // ---------------------------------------------------------------------------
 bool executeCoordinatedPhase(
@@ -326,6 +391,32 @@ int main(int argc, char** argv) {
     moveit::core::RobotState ik_state(robot_model);
     ik_state.setToDefaultValues();
 
+    // -----------------------------------------------------------------------
+    // 规划场景初始化：添加碰撞对象
+    // -----------------------------------------------------------------------
+    moveit::planning_interface::PlanningSceneInterface psi;
+
+    // 计算抓取点和放置点的中点（用于放置碰撞对象）
+    const double grasp_mid_x = (0.194 + 0.270) / 2.0;  // 0.232
+    const double grasp_mid_y = (0.052 + (-0.014)) / 2.0; // 0.019
+    const double grasp_mid_z = (1.330 + 1.445) / 2.0;    // 1.388
+
+    const double place_mid_x = (0.154 + 0.230) / 2.0;    // 0.192
+    const double place_mid_y = (0.072 + 0.006) / 2.0;    // 0.039
+    const double place_mid_z = (1.350 + 1.465) / 2.0;    // 1.408
+
+    // 1) 抓取目标物 —— 5cm 方盒，位于两臂末端之间
+    addCollisionBox(psi, "target_object",
+                    grasp_mid_x, grasp_mid_y, grasp_mid_z,
+                    0.05, 0.05, 0.05);
+    RCLCPP_INFO(node->get_logger(), "已添加「抓取物」碰撞对象。");
+
+    // 2) 放置平台暂不添加 —— 等 Phase 2 夹取后再加入场景，
+    //    避免与 Phase 1 的起始/目标位姿碰撞
+
+    // 等待规划场景同步
+    std::this_thread::sleep_for(std::chrono::milliseconds(500));
+
     // =======================================================================
     // Phase 1: 接近 (Approach) —— 双臂运动到初始夹取目标点
     // =======================================================================
@@ -408,13 +499,29 @@ int main(int argc, char** argv) {
     }
 
     // =======================================================================
-    // Phase 2: 闭合 (Grasp) —— 停留模拟夹具闭合夹取
+    // Phase 2: 闭合 (Grasp) —— 停留模拟夹具闭合夹取 + 附着物体
     // =======================================================================
     RCLCPP_INFO(node->get_logger(), "========== Phase 2: 闭合 (Grasp) 停留 2 秒 ==========");
     std::this_thread::sleep_for(std::chrono::seconds(2));
 
+    // 将物体附着到左末端连杆 —— 模拟夹持，物体随左臂运动
+    std::vector<std::string> touch_links = {"left_Link7", "right_Link7"};
+    attachObject(psi, "target_object", "left_Link7", touch_links);
+    RCLCPP_INFO(node->get_logger(), "物体已附着至 left_Link7，将随左臂协同运动。");
+
+    // 添加放置平台 —— 放在桌面上方 5cm 处 (Z=1.05)，远低于手臂位姿高度
+    addCollisionBox(psi, "destination_surface",
+                    place_mid_x, place_mid_y, 1.05,
+                    0.25, 0.25, 0.02);
+    RCLCPP_INFO(node->get_logger(), "已添加「放置平台」碰撞对象 (Z=1.05)。");
+    std::this_thread::sleep_for(std::chrono::milliseconds(500));
+
     // =======================================================================
     // Phase 3: 提起 (Lift) —— 保持相对位姿，向上提起 10cm
+    //
+    // 锁步机制：dual_arm 规划组将双臂所有 14 个关节作为一个整体规划，
+    // OMPL 在联合空间中采样 → 每个轨迹点同时包含左右臂关节值 →
+    // 执行时双臂自然同步到达各自目标，无先后之分。
     // =======================================================================
     if (!executeCoordinatedPhase(node, "Phase 3: 提起 (Lift)",
                                  ik_state, left_jmg, right_jmg, dual_jmg,
@@ -440,8 +547,19 @@ int main(int argc, char** argv) {
         rclcpp::shutdown(); spin_thread.join(); return 1;
     }
 
+    // 放置完成 —— 将物体从末端脱离，重新添加为放置位置的静态碰撞对象
+    removeCollisionObject(psi, "target_object");
+    addCollisionBox(psi, "target_object",
+                    place_mid_x, place_mid_y, place_mid_z,
+                    0.05, 0.05, 0.05);
+    RCLCPP_INFO(node->get_logger(), "物体已放置到目标位置。");
+    std::this_thread::sleep_for(std::chrono::milliseconds(500));
+
     // =======================================================================
     // Phase 6: 复位 (Retract) —— 双臂回到 SRDF home 位姿
+    //
+    // 此时物体停留在放置位置，双臂从物体旁撤离。
+    // OMPL 会检测双臂与物体的碰撞，确保撤离路径安全。
     // =======================================================================
     RCLCPP_INFO(node->get_logger(), "========== Phase 6: 复位 (Retract) ==========");
 
