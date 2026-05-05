@@ -25,6 +25,10 @@
 using namespace moveit::task_constructor;
 using FollowJointTrajectory = control_msgs::action::FollowJointTrajectory;
 
+// ---------------------------------------------------------------------------
+// 工具函数
+// ---------------------------------------------------------------------------
+
 // 从完整 RobotTrajectory 中提取指定 group 的子轨迹
 trajectory_msgs::msg::JointTrajectory extractSubTrajectory(
     const robot_trajectory::RobotTrajectory& full_traj,
@@ -63,7 +67,7 @@ trajectory_msgs::msg::JointTrajectory extractSubTrajectory(
     return result;
 }
 
-// 发送轨迹到指定控制器，返回 result future
+// 发送轨迹到指定控制器
 std::shared_future<rclcpp_action::ClientGoalHandle<FollowJointTrajectory>::WrappedResult>
 sendTrajectory(
     rclcpp_action::Client<FollowJointTrajectory>::SharedPtr client,
@@ -104,7 +108,7 @@ robot_trajectory::RobotTrajectoryConstPtr getSolutionTrajectory(const Task& task
     return nullptr;
 }
 
-// 执行 dual_arm 轨迹：尝试 dual_arm_controller，否则拆分为左右臂
+// 执行 dual_arm 轨迹：优先 dual_arm_controller，否则拆分为左右臂
 bool executeDualArmTrajectory(
     rclcpp::Node::SharedPtr node,
     const robot_trajectory::RobotTrajectory& full_traj,
@@ -168,6 +172,126 @@ bool executeDualArmTrajectory(
     }
 }
 
+// Eigen::Isometry3d → geometry_msgs::msg::Pose
+geometry_msgs::msg::Pose eigenToPose(const Eigen::Isometry3d& t)
+{
+    geometry_msgs::msg::Pose p;
+    p.position.x = t.translation().x();
+    p.position.y = t.translation().y();
+    p.position.z = t.translation().z();
+    Eigen::Quaterniond q(t.linear());
+    p.orientation.x = q.x();
+    p.orientation.y = q.y();
+    p.orientation.z = q.z();
+    p.orientation.w = q.w();
+    return p;
+}
+
+// ---------------------------------------------------------------------------
+// 协同运动阶段：保持左右末端相对位姿, 按位移生成新目标, IK, 规划, 执行
+// ---------------------------------------------------------------------------
+bool executeCoordinatedPhase(
+    rclcpp::Node::SharedPtr node,
+    const std::string& phase_name,
+    moveit::core::RobotState& ik_state,
+    const moveit::core::JointModelGroup* left_jmg,
+    const moveit::core::JointModelGroup* right_jmg,
+    const moveit::core::JointModelGroup* dual_jmg,
+    const Eigen::Vector3d& displacement)
+{
+    RCLCPP_INFO(node->get_logger(), "========== %s ==========", phase_name.c_str());
+
+    // FK
+    ik_state.updateLinkTransforms();
+    Eigen::Isometry3d T_L = ik_state.getGlobalLinkTransform("left_Link7");
+    Eigen::Isometry3d T_R = ik_state.getGlobalLinkTransform("right_Link7");
+
+    RCLCPP_INFO(node->get_logger(), "当前左末端: [%.3f, %.3f, %.3f]  右末端: [%.3f, %.3f, %.3f]",
+                T_L.translation().x(), T_L.translation().y(), T_L.translation().z(),
+                T_R.translation().x(), T_R.translation().y(), T_R.translation().z());
+
+    // 相对位姿
+    Eigen::Isometry3d T_left_to_right = T_L.inverse() * T_R;
+
+    // 新目标
+    Eigen::Isometry3d T_L_new = T_L;
+    T_L_new.translation() += displacement;
+    Eigen::Isometry3d T_R_new = T_L_new * T_left_to_right;
+
+    RCLCPP_INFO(node->get_logger(), "左末端目标:  [%.3f, %.3f, %.3f]  右末端目标:  [%.3f, %.3f, %.3f]",
+                T_L_new.translation().x(), T_L_new.translation().y(), T_L_new.translation().z(),
+                T_R_new.translation().x(), T_R_new.translation().y(), T_R_new.translation().z());
+
+    // IK
+    geometry_msgs::msg::Pose left_pose  = eigenToPose(T_L_new);
+    geometry_msgs::msg::Pose right_pose = eigenToPose(T_R_new);
+
+    if (!ik_state.setFromIK(left_jmg, left_pose, 0.1)) {
+        RCLCPP_ERROR(node->get_logger(), "%s 左臂 IK 求解失败，目标可能超出工作空间。", phase_name.c_str());
+        return false;
+    }
+    RCLCPP_INFO(node->get_logger(), "%s 左臂 IK 求解成功。", phase_name.c_str());
+
+    if (!ik_state.setFromIK(right_jmg, right_pose, 0.1)) {
+        RCLCPP_ERROR(node->get_logger(), "%s 右臂 IK 求解失败，目标可能超出工作空间。", phase_name.c_str());
+        return false;
+    }
+    RCLCPP_INFO(node->get_logger(), "%s 右臂 IK 求解成功。", phase_name.c_str());
+
+    // MTC 规划 + 执行
+    auto pipeline_planner = std::make_shared<solvers::PipelinePlanner>(node);
+    pipeline_planner->setPlannerId("RRTConnectkConfigDefault");
+
+    Task task;
+    task.stages()->setName(phase_name);
+    task.loadRobotModel(node);
+    task.add(std::make_unique<stages::CurrentState>("Current State"));
+
+    moveit_msgs::msg::RobotState goal_msg;
+    goal_msg.is_diff = true;
+    std::vector<double> vals;
+    ik_state.copyJointGroupPositions(dual_jmg, vals);
+    goal_msg.joint_state.name    = dual_jmg->getActiveJointModelNames();
+    goal_msg.joint_state.position = vals;
+
+    auto move = std::make_unique<stages::MoveTo>("Move", pipeline_planner);
+    move->setGroup("dual_arm");
+    move->setGoal(goal_msg);
+    task.add(std::move(move));
+
+    try {
+        task.init();
+        if (!task.plan(5)) {
+            RCLCPP_ERROR(node->get_logger(), "%s 推演失败！(可能发生碰撞)", phase_name.c_str());
+            return false;
+        }
+
+        auto traj = getSolutionTrajectory(task);
+        if (!traj || traj->getWayPointCount() == 0) {
+            RCLCPP_ERROR(node->get_logger(), "%s 无法获取轨迹。", phase_name.c_str());
+            return false;
+        }
+
+        RCLCPP_INFO(node->get_logger(), "%s 轨迹: %zu 点, %.2f 秒。",
+                    phase_name.c_str(),
+                    traj->getWayPointCount(),
+                    traj->getWayPointDurationFromStart(traj->getWayPointCount() - 1));
+
+        if (!executeDualArmTrajectory(node, *traj, dual_jmg, left_jmg, right_jmg)) {
+            RCLCPP_ERROR(node->get_logger(), "%s 执行失败！", phase_name.c_str());
+            return false;
+        }
+        RCLCPP_INFO(node->get_logger(), "%s 执行完成！", phase_name.c_str());
+        return true;
+    } catch (const std::exception& e) {
+        RCLCPP_ERROR(node->get_logger(), "%s 异常: %s", phase_name.c_str(), e.what());
+        return false;
+    }
+}
+
+// ---------------------------------------------------------------------------
+// main
+// ---------------------------------------------------------------------------
 int main(int argc, char** argv) {
     rclcpp::init(argc, argv);
 
@@ -185,7 +309,7 @@ int main(int argc, char** argv) {
     RCLCPP_INFO(node->get_logger(), "MTC 双臂协同搬运规划节点已启动...");
 
     // 加载机器人模型获取 JointModelGroup
-    Task boot_task;  // 仅用于加载 RobotModel
+    Task boot_task;
     boot_task.loadRobotModel(node);
     const auto& robot_model = boot_task.getRobotModel();
 
@@ -195,62 +319,56 @@ int main(int argc, char** argv) {
 
     if (!left_jmg || !right_jmg || !dual_jmg) {
         RCLCPP_FATAL(node->get_logger(), "无法获取关节模型组，请检查 SRDF 配置。");
-        rclcpp::shutdown();
-        spin_thread.join();
-        return 1;
+        rclcpp::shutdown(); spin_thread.join(); return 1;
     }
 
     // IK 种子状态
     moveit::core::RobotState ik_state(robot_model);
     ik_state.setToDefaultValues();
 
-    // ===================================================================
-    // Phase 1: 双臂运动到初始夹取目标点
-    // ===================================================================
-    RCLCPP_INFO(node->get_logger(), "========== Phase 1: 接近目标点 ==========");
+    // =======================================================================
+    // Phase 1: 接近 (Approach) —— 双臂运动到初始夹取目标点
+    // =======================================================================
+    RCLCPP_INFO(node->get_logger(), "========== Phase 1: 接近 (Approach) ==========");
 
-    geometry_msgs::msg::Pose left_pose1;
-    left_pose1.position.x = 0.194;
-    left_pose1.position.y = 0.052;
-    left_pose1.position.z = 1.330;
+    geometry_msgs::msg::Pose left_pose_approach;
+    left_pose_approach.position.x = 0.194;
+    left_pose_approach.position.y = 0.052;
+    left_pose_approach.position.z = 1.330;
     {
-        tf2::Quaternion q;
-        q.setRPY(1.669, 0.022, -0.001);
-        left_pose1.orientation = tf2::toMsg(q);
+        tf2::Quaternion q; q.setRPY(1.669, 0.022, -0.001);
+        left_pose_approach.orientation = tf2::toMsg(q);
     }
 
-    geometry_msgs::msg::Pose right_pose1;
-    right_pose1.position.x = 0.270;
-    right_pose1.position.y = -0.014;
-    right_pose1.position.z = 1.445;
+    geometry_msgs::msg::Pose right_pose_approach;
+    right_pose_approach.position.x = 0.270;
+    right_pose_approach.position.y = -0.014;
+    right_pose_approach.position.z = 1.445;
     {
-        tf2::Quaternion q;
-        q.setRPY(-1.747, 0.020, -0.001);
-        right_pose1.orientation = tf2::toMsg(q);
+        tf2::Quaternion q; q.setRPY(-1.747, 0.020, -0.001);
+        right_pose_approach.orientation = tf2::toMsg(q);
     }
 
-    if (!ik_state.setFromIK(left_jmg, left_pose1, 0.1)) {
+    if (!ik_state.setFromIK(left_jmg, left_pose_approach, 0.1)) {
         RCLCPP_ERROR(node->get_logger(), "Phase 1 左臂 IK 求解失败。");
         rclcpp::shutdown(); spin_thread.join(); return 1;
     }
     RCLCPP_INFO(node->get_logger(), "Phase 1 左臂 IK 求解成功。");
 
-    if (!ik_state.setFromIK(right_jmg, right_pose1, 0.1)) {
+    if (!ik_state.setFromIK(right_jmg, right_pose_approach, 0.1)) {
         RCLCPP_ERROR(node->get_logger(), "Phase 1 右臂 IK 求解失败。");
         rclcpp::shutdown(); spin_thread.join(); return 1;
     }
     RCLCPP_INFO(node->get_logger(), "Phase 1 右臂 IK 求解成功。");
 
-    // 构建 joint-space goal
     {
-        // ---- MTC 规划 ----
-        auto pipeline_planner1 = std::make_shared<solvers::PipelinePlanner>(node);
-        pipeline_planner1->setPlannerId("RRTConnectkConfigDefault");
+        auto pipeline_planner = std::make_shared<solvers::PipelinePlanner>(node);
+        pipeline_planner->setPlannerId("RRTConnectkConfigDefault");
 
-        Task task1;
-        task1.stages()->setName("Phase 1 - Approach");
-        task1.loadRobotModel(node);
-        task1.add(std::make_unique<stages::CurrentState>("Current State"));
+        Task task;
+        task.stages()->setName("Phase 1 - Approach");
+        task.loadRobotModel(node);
+        task.add(std::make_unique<stages::CurrentState>("Current State"));
 
         moveit_msgs::msg::RobotState goal_msg;
         goal_msg.is_diff = true;
@@ -259,28 +377,25 @@ int main(int argc, char** argv) {
         goal_msg.joint_state.name    = dual_jmg->getActiveJointModelNames();
         goal_msg.joint_state.position = vals;
 
-        auto move1 = std::make_unique<stages::MoveTo>("Approach", pipeline_planner1);
+        auto move1 = std::make_unique<stages::MoveTo>("Approach", pipeline_planner);
         move1->setGroup("dual_arm");
         move1->setGoal(goal_msg);
-        task1.add(std::move(move1));
+        task.add(std::move(move1));
 
         try {
-            task1.init();
-            if (!task1.plan(5)) {
+            task.init();
+            if (!task.plan(5)) {
                 RCLCPP_ERROR(node->get_logger(), "Phase 1 推演失败！");
                 rclcpp::shutdown(); spin_thread.join(); return 1;
             }
-
-            auto traj = getSolutionTrajectory(task1);
+            auto traj = getSolutionTrajectory(task);
             if (!traj || traj->getWayPointCount() == 0) {
                 RCLCPP_ERROR(node->get_logger(), "Phase 1 无法获取轨迹。");
                 rclcpp::shutdown(); spin_thread.join(); return 1;
             }
-
             RCLCPP_INFO(node->get_logger(), "Phase 1 轨迹: %zu 点, %.2f 秒。",
                         traj->getWayPointCount(),
                         traj->getWayPointDurationFromStart(traj->getWayPointCount() - 1));
-
             if (!executeDualArmTrajectory(node, *traj, dual_jmg, left_jmg, right_jmg)) {
                 RCLCPP_ERROR(node->get_logger(), "Phase 1 执行失败！");
                 rclcpp::shutdown(); spin_thread.join(); return 1;
@@ -292,77 +407,55 @@ int main(int argc, char** argv) {
         }
     }
 
-    // ===================================================================
-    // Phase 2: 停留后保持末端相对位姿，协同转移到新位置
-    // ===================================================================
-    RCLCPP_INFO(node->get_logger(), "========== 停留 3 秒 ==========");
-    std::this_thread::sleep_for(std::chrono::seconds(3));
+    // =======================================================================
+    // Phase 2: 闭合 (Grasp) —— 停留模拟夹具闭合夹取
+    // =======================================================================
+    RCLCPP_INFO(node->get_logger(), "========== Phase 2: 闭合 (Grasp) 停留 2 秒 ==========");
+    std::this_thread::sleep_for(std::chrono::seconds(2));
 
-    RCLCPP_INFO(node->get_logger(), "========== Phase 2: 协同转移 ==========");
-
-    // 计算 Phase 1 末端位姿 (FK)
-    ik_state.updateLinkTransforms();
-    Eigen::Isometry3d T_L1 = ik_state.getGlobalLinkTransform("left_Link7");
-    Eigen::Isometry3d T_R1 = ik_state.getGlobalLinkTransform("right_Link7");
-
-    RCLCPP_INFO(node->get_logger(), "左末端: [%.3f, %.3f, %.3f]",
-                T_L1.translation().x(), T_L1.translation().y(), T_L1.translation().z());
-    RCLCPP_INFO(node->get_logger(), "右末端: [%.3f, %.3f, %.3f]",
-                T_R1.translation().x(), T_R1.translation().y(), T_R1.translation().z());
-
-    // 保持相对位姿：T_left_to_right = inv(T_L) * T_R
-    Eigen::Isometry3d T_left_to_right = T_L1.inverse() * T_R1;
-
-    // 定义左臂新目标（世界坐标系位移，模拟将物体向上提升 10cm）
-    Eigen::Isometry3d T_L2 = T_L1;
-    T_L2.translation() += Eigen::Vector3d(0.0, 0.0, 0.10);
-
-    // 右臂新目标 = T_L2 * T_left_to_right（保持相对位姿不变）
-    Eigen::Isometry3d T_R2 = T_L2 * T_left_to_right;
-
-    RCLCPP_INFO(node->get_logger(), "Phase 2 左末端目标: [%.3f, %.3f, %.3f]",
-                T_L2.translation().x(), T_L2.translation().y(), T_L2.translation().z());
-    RCLCPP_INFO(node->get_logger(), "Phase 2 右末端目标: [%.3f, %.3f, %.3f]",
-                T_R2.translation().x(), T_R2.translation().y(), T_R2.translation().z());
-
-    // Eigen::Isometry3d → geometry_msgs::msg::Pose 手动转换
-    auto eigenToPose = [](const Eigen::Isometry3d& t) {
-        geometry_msgs::msg::Pose p;
-        p.position.x = t.translation().x();
-        p.position.y = t.translation().y();
-        p.position.z = t.translation().z();
-        Eigen::Quaterniond q(t.linear());
-        p.orientation.x = q.x();
-        p.orientation.y = q.y();
-        p.orientation.z = q.z();
-        p.orientation.w = q.w();
-        return p;
-    };
-    geometry_msgs::msg::Pose left_pose2  = eigenToPose(T_L2);
-    geometry_msgs::msg::Pose right_pose2 = eigenToPose(T_R2);
-
-    // 用 Phase 1 的关节值作为 IK 种子
-    if (!ik_state.setFromIK(left_jmg, left_pose2, 0.1)) {
-        RCLCPP_ERROR(node->get_logger(), "Phase 2 左臂 IK 求解失败，目标可能超出工作空间。");
+    // =======================================================================
+    // Phase 3: 提起 (Lift) —— 保持相对位姿，向上提起 10cm
+    // =======================================================================
+    if (!executeCoordinatedPhase(node, "Phase 3: 提起 (Lift)",
+                                 ik_state, left_jmg, right_jmg, dual_jmg,
+                                 Eigen::Vector3d(0.0, 0.0, 0.10))) {
         rclcpp::shutdown(); spin_thread.join(); return 1;
     }
-    RCLCPP_INFO(node->get_logger(), "Phase 2 左臂 IK 求解成功。");
 
-    if (!ik_state.setFromIK(right_jmg, right_pose2, 0.1)) {
-        RCLCPP_ERROR(node->get_logger(), "Phase 2 右臂 IK 求解失败，目标可能超出工作空间。");
+    // =======================================================================
+    // Phase 4: 转移 (Transfer) —— 保持相对位姿，平移至新位置
+    // =======================================================================
+    if (!executeCoordinatedPhase(node, "Phase 4: 转移 (Transfer)",
+                                 ik_state, left_jmg, right_jmg, dual_jmg,
+                                 Eigen::Vector3d(-0.04, 0.02, 0.0))) {
         rclcpp::shutdown(); spin_thread.join(); return 1;
     }
-    RCLCPP_INFO(node->get_logger(), "Phase 2 右臂 IK 求解成功。");
 
-    // ---- MTC 规划 ----
+    // =======================================================================
+    // Phase 5: 放置 (Place) —— 保持相对位姿，下降放物
+    // =======================================================================
+    if (!executeCoordinatedPhase(node, "Phase 5: 放置 (Place)",
+                                 ik_state, left_jmg, right_jmg, dual_jmg,
+                                 Eigen::Vector3d(0.0, 0.0, -0.08))) {
+        rclcpp::shutdown(); spin_thread.join(); return 1;
+    }
+
+    // =======================================================================
+    // Phase 6: 复位 (Retract) —— 双臂回到 SRDF home 位姿
+    // =======================================================================
+    RCLCPP_INFO(node->get_logger(), "========== Phase 6: 复位 (Retract) ==========");
+
+    ik_state.setToDefaultValues(left_jmg, "home");
+    ik_state.setToDefaultValues(right_jmg, "home");
+
     {
-        auto pipeline_planner2 = std::make_shared<solvers::PipelinePlanner>(node);
-        pipeline_planner2->setPlannerId("RRTConnectkConfigDefault");
+        auto pipeline_planner = std::make_shared<solvers::PipelinePlanner>(node);
+        pipeline_planner->setPlannerId("RRTConnectkConfigDefault");
 
-        Task task2;
-        task2.stages()->setName("Phase 2 - Coordinated Transfer");
-        task2.loadRobotModel(node);
-        task2.add(std::make_unique<stages::CurrentState>("Current State"));
+        Task task;
+        task.stages()->setName("Phase 6 - Retract");
+        task.loadRobotModel(node);
+        task.add(std::make_unique<stages::CurrentState>("Current State"));
 
         moveit_msgs::msg::RobotState goal_msg;
         goal_msg.is_diff = true;
@@ -371,39 +464,37 @@ int main(int argc, char** argv) {
         goal_msg.joint_state.name    = dual_jmg->getActiveJointModelNames();
         goal_msg.joint_state.position = vals;
 
-        auto move2 = std::make_unique<stages::MoveTo>("Transfer", pipeline_planner2);
-        move2->setGroup("dual_arm");
-        move2->setGoal(goal_msg);
-        task2.add(std::move(move2));
+        auto move6 = std::make_unique<stages::MoveTo>("Retract", pipeline_planner);
+        move6->setGroup("dual_arm");
+        move6->setGoal(goal_msg);
+        task.add(std::move(move6));
 
         try {
-            task2.init();
-            if (!task2.plan(5)) {
-                RCLCPP_ERROR(node->get_logger(), "Phase 2 推演失败！(可能被障碍物阻挡)");
+            task.init();
+            if (!task.plan(5)) {
+                RCLCPP_ERROR(node->get_logger(), "Phase 6 推演失败！");
                 rclcpp::shutdown(); spin_thread.join(); return 1;
             }
-
-            auto traj = getSolutionTrajectory(task2);
+            auto traj = getSolutionTrajectory(task);
             if (!traj || traj->getWayPointCount() == 0) {
-                RCLCPP_ERROR(node->get_logger(), "Phase 2 无法获取轨迹。");
+                RCLCPP_ERROR(node->get_logger(), "Phase 6 无法获取轨迹。");
                 rclcpp::shutdown(); spin_thread.join(); return 1;
             }
-
-            RCLCPP_INFO(node->get_logger(), "Phase 2 轨迹: %zu 点, %.2f 秒。",
+            RCLCPP_INFO(node->get_logger(), "Phase 6 轨迹: %zu 点, %.2f 秒。",
                         traj->getWayPointCount(),
                         traj->getWayPointDurationFromStart(traj->getWayPointCount() - 1));
-
             if (!executeDualArmTrajectory(node, *traj, dual_jmg, left_jmg, right_jmg)) {
-                RCLCPP_ERROR(node->get_logger(), "Phase 2 执行失败！");
+                RCLCPP_ERROR(node->get_logger(), "Phase 6 执行失败！");
                 rclcpp::shutdown(); spin_thread.join(); return 1;
             }
-            RCLCPP_INFO(node->get_logger(), "Phase 2 执行完成！双臂协同搬运结束。");
+            RCLCPP_INFO(node->get_logger(), "Phase 6 执行完成！");
         } catch (const std::exception& e) {
-            RCLCPP_ERROR(node->get_logger(), "Phase 2 异常: %s", e.what());
+            RCLCPP_ERROR(node->get_logger(), "Phase 6 异常: %s", e.what());
             rclcpp::shutdown(); spin_thread.join(); return 1;
         }
     }
 
+    RCLCPP_INFO(node->get_logger(), "全部 6 个阶段执行完毕！");
     rclcpp::shutdown();
     spin_thread.join();
     return 0;
